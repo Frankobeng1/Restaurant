@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart Delicious Bites</title>
+
+<style>
+:root { --primary:#ff7a18; }
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
+
+body {
+    background:#0f0f0f;
+    color:white;
+}
+
+header {
+    display:flex;
+    justify-content:space-between;
+    padding:15px 40px;
+    background:rgba(0,0,0,0.6);
+}
+
+header h1 { color:var(--primary); }
+
+header a {
+    padding: 7px 18px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+    transition: background 0.2s, color 0.2s;
+    margin-left: 20px;
+}
+header a:hover {
+    background: #fff;
+    color: var(--primary);
+}
+
+.container {
+    padding:40px;
+}
+
+.item {
+    background:#1a1a1a;
+    padding:15px;
+    margin:15px 0;
+    border-radius:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.controls {
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.controls button {
+    padding:5px 10px;
+    border:none;
+    background:var(--primary);
+    color:white;
+    cursor:pointer;
+}
+
+.remove {
+    background:red;
+}
+
+.total {
+    margin-top:20px;
+    font-size:22px;
+}
+
+/* BUTTON */
+.proceed {
+    margin-top: 20px;
+    padding: 8px 24px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    color: #222;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: background 0.2s, transform 0.2s;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.proceed:hover {
+    background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+    transform: translateY(-2px) scale(1.04);
+}
+
+.empty {
+    text-align:center;
+    margin-top:50px;
+    color:#aaa;
+}
+
+/* PIZZA LOADER */
+#loader {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#0f0f0f;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:2000;
+    display: none; /* hide by default */
+}
+
+#loader p {
+    color: var(--primary);
+    margin-top:15px;
+    font-size:18px;
+}
+
+.pizza {
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:orange;
+    position:relative;
+    animation: spin 1s linear infinite;
+}
+
+.pizza::before {
+    content:"";
+    width:10px;
+    height:10px;
+    background:red;
+    position:absolute;
+    top:20px;
+    left:20px;
+    border-radius:50%;
+    box-shadow: 20px 10px red, 10px 30px red;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* CUSTOM NOTIFICATION */
+.notification-bar {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 3000;
+    transition: top 0.5s ease;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-bar.show {
+    top: 0;
+}
+
+.notification-bar .icon {
+    font-size: 20px;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    header { 
+        padding:15px 20px; 
+        flex-direction: column;
+        align-items: center;
+    }
+    header h1 { font-size: 24px; margin-bottom: 10px; }
+    header a { margin: 5px 0; font-size: 14px; }
+    .container { padding: 20px 10px; }
+    .item { 
+        flex-direction: column; 
+        text-align: center; 
+        gap: 15px; 
+    }
+    .controls { justify-content: center; }
+    .total { font-size: 18px; text-align: center; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PIZZA LOADER -->
+<div id="loader">
+  <div class="pizza"></div>
+  <p>Delicious Bites...</p>
+</div>
+
+<!-- CUSTOM NOTIFICATION BAR -->
+<div id="notificationBar" class="notification-bar">
+    <span class="icon">🔔</span>
+    <span id="notificationMessage"></span>
+</div>
+
+<header>
+<h1>🛒 Your Cart</h1>
+<a href="#" onclick="goToPage('menu.html')">← Back to Menu</a>
+<a href="#" onclick="logout()" style="margin-left:10px;">Logout</a>
+</header>
+
+<div class="container">
+<div id="cartItems"></div>
+<div class="total" id="total"></div>
+<button class="proceed" onclick="goToTransaction()">Proceed to Transaction</button>
+</div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function showNotification(message) {
+    const bar = document.getElementById("notificationBar");
+    const msg = document.getElementById("notificationMessage");
+    msg.innerText = message;
+    bar.classList.add("show");
+    setTimeout(() => {
+        bar.classList.remove("show");
+    }, 3000);
+}
+
+function displayCart(){
+    let container = document.getElementById("cartItems");
+    let total = 0;
+
+    container.innerHTML = "";
+
+    if(cart.length === 0){
+        container.innerHTML = "<div class='empty'>Your cart is empty 😢</div>";
+        document.getElementById("total").innerText = "";
+        return;
+    }
+
+    cart.forEach((item,index)=>{
+        total += item.price * item.quantity;
+
+        container.innerHTML += `
+        <div class="item">
+            <div>
+                <h3>${item.name}</h3>
+                <p>GH₵ ${item.price}</p>
+            </div>
+
+            <div class="controls">
+                <button onclick="decrease(${index})">-</button>
+                ${item.quantity}
+                <button onclick="increase(${index})">+</button>
+            </div>
+
+            <div>
+                GH₵ ${item.price * item.quantity}
+                <button class="remove" onclick="removeItem(${index})">X</button>
+            </div>
+        </div>
+        `;
+    });
+
+    document.getElementById("total").innerText = "Total: GH₵ " + total;
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    showNotification("Logged out!");
+    setTimeout(() => {
+        goToPage("login.html");
+    }, 1000);
+}
+
+function increase(index){
+    cart[index].quantity++;
+    saveCart();
+}
+
+function decrease(index){
+    if(cart[index].quantity > 1){
+        cart[index].quantity--;
+    } else {
+        cart.splice(index,1);
+    }
+    saveCart();
+}
+
+function removeItem(index){
+    cart.splice(index,1);
+    saveCart();
+}
+
+function saveCart(){
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
+}
+
+/* 👉 GO TO TRANSACTION PAGE WITH PIZZA LOADER */
+function goToTransaction(){
+    if(cart.length === 0){
+        showNotification("Cart is empty!");
+        return;
+    }
+
+    goToPage("transactions.html");
+}
+
+function goToPage(url) {
+    document.getElementById("loader").style.display = "flex";
+    setTimeout(() => {
+        window.location.href = url;
+    }, 1500);
+}
+
+displayCart();
+</script>
+
+</body>
+</html>

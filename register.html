@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register</title>
+
+<style>
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
+
+body {
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+    url('Images/background.jpg') no-repeat center/cover;
+}
+
+.card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    padding:30px;
+    border-radius:15px;
+    width:320px;
+    color:white;
+    animation: fadeIn 0.8s ease;
+}
+
+h2 { text-align:center; margin-bottom:20px; }
+
+.input-group {
+    position:relative;
+    margin-bottom:15px;
+}
+
+input {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    outline:none;
+}
+
+.eye {
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+}
+
+button {
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background: green;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.link {
+    text-align:center;
+    margin-top:10px;
+    cursor:pointer;
+    color:#ddd;
+}
+
+.link:hover { color:white; }
+
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(20px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+/* PIZZA LOADER */
+#loader {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#0f0f0f;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:2000;
+    display: none;
+}
+
+#loader p {
+    color: green; /* Using green as it's the theme for register button */
+    margin-top:15px;
+    font-size:18px;
+}
+
+.pizza {
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:orange;
+    position:relative;
+    animation: spin 1s linear infinite;
+}
+
+.pizza::before {
+    content:"";
+    width:10px;
+    height:10px;
+    background:red;
+    position:absolute;
+    top:20px;
+    left:20px;
+    border-radius:50%;
+    box-shadow: 20px 10px red, 10px 30px red;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* CUSTOM NOTIFICATION */
+.notification-bar {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: green;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 3000;
+    transition: top 0.5s ease;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-bar.show {
+    top: 0;
+}
+
+.notification-bar .icon {
+    font-size: 20px;
+}
+
+/* RESPONSIVE */
+@media(max-width:400px){
+    .card { width: 90%; padding: 20px; }
+    h2 { font-size: 20px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PIZZA LOADER -->
+<div id="loader">
+  <div class="pizza"></div>
+  <p>Delicious Bites...</p>
+</div>
+
+<!-- CUSTOM NOTIFICATION BAR -->
+<div id="notificationBar" class="notification-bar">
+    <span class="icon">🔔</span>
+    <span id="notificationMessage"></span>
+</div>
+
+<div class="card">
+    <h2>Create Account</h2>
+
+    <div class="input-group">
+        <input type="text" id="user" placeholder="Username">
+    </div>
+
+    <div class="input-group">
+        <input type="email" id="email" placeholder="Email">
+    </div>
+
+    <div class="input-group">
+        <input type="password" id="pass" placeholder="Password">
+        <span class="eye" onclick="togglePassword()">👁️</span>
+    </div>
+
+    <button onclick="register()">Register</button>
+
+    <p class="link" onclick="goLogin()">Already have account?</p>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function showNotification(message) {
+    const bar = document.getElementById("notificationBar");
+    const msg = document.getElementById("notificationMessage");
+    msg.innerText = message;
+    bar.classList.add("show");
+    setTimeout(() => {
+        bar.classList.remove("show");
+    }, 3000);
+}
+
+function togglePassword() {
+    $("pass").type =
+        $("pass").type === "password" ? "text" : "password";
+}
+
+function register() {
+    const user = $("user").value.trim();
+    const email = $("email").value.trim();
+    const pass = $("pass").value.trim();
+
+    if (!user || !email || !pass) {
+        showNotification("Fill all fields");
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showNotification("Invalid email format");
+        return;
+    }
+
+    if (pass.length < 6) {
+        showNotification("Password must be at least 6 characters");
+        return;
+    }
+
+    if (localStorage.getItem(user)) {
+        showNotification("User already exists");
+        return;
+    }
+
+    const userData = {
+        email: email,
+        pass: pass
+    };
+
+    localStorage.setItem(user, JSON.stringify(userData));
+    showNotification("Account created!");
+    setTimeout(() => {
+        document.getElementById("loader").style.display = "flex";
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
+    }, 1000);
+}
+
+function goLogin() {
+    document.getElementById("loader").style.display = "flex";
+    setTimeout(() => {
+        window.location.href = "login.html";
+    }, 1500);
+}
+</script>
+
+</body>
+</html>

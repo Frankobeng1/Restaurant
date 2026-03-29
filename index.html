@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delicious Bites</title>
+
+<style>
+:root {
+    --primary: #ff7a18;
+    --glass: rgba(255,255,255,0.08);
+}
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+    scroll-behavior:smooth;
+}
+
+body {
+    background:#0f0f0f;
+    color:white;
+}
+
+/* NAVBAR */
+header {
+    position:fixed;
+    width:100%;
+    top:0;
+    display:flex;
+    justify-content:space-between;
+    padding:15px 50px;
+    backdrop-filter: blur(10px);
+    background:rgba(0,0,0,0.5);
+    z-index:1000;
+}
+
+header h1 {
+    color:var(--primary);
+}
+
+nav a {
+    margin:0 15px;
+    text-decoration:none;
+    color:#ddd;
+    transition:0.3s;
+}
+
+nav a:hover {
+    color:white;
+}
+
+/* HERO */
+.hero {
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+
+    background:
+    linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+    url('https://images.unsplash.com/photo-1504674900247-0877df9cc836') center/cover;
+}
+
+.hero h2 {
+    font-size:55px;
+}
+
+.hero p {
+    margin:15px 0;
+    color:#ccc;
+}
+
+/* CAROUSEL */
+.carousel {
+    padding:80px 20px;
+    text-align:center;
+}
+
+.carousel h2 {
+    margin-bottom:30px;
+}
+
+.slider {
+    display:flex;
+    gap:20px;
+    overflow:hidden;
+    position:relative;
+}
+
+/* FOOD CARD */
+.card {
+    min-width:250px;
+    background:var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius:20px;
+    overflow:hidden;
+    transition:0.4s;
+}
+
+.card img {
+    width:100%;
+    height:160px;
+    object-fit:cover;
+}
+
+.card h3 {
+    margin:10px;
+}
+
+.card p {
+    color:var(--primary);
+    margin-bottom:10px;
+}
+
+.card:hover {
+    transform:translateY(-10px) scale(1.03);
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* FOOTER */
+footer {
+    text-align:center;
+    padding:20px;
+    background:#000;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    header { 
+        padding:10px 20px; 
+        flex-direction: column;
+        align-items: center;
+        position: static;
+    }
+    header h1 { font-size: 24px; margin-bottom: 10px; }
+    nav { display: flex; flex-wrap: wrap; justify-content: center; }
+    nav a { margin: 5px 10px; font-size: 14px; }
+    .hero { height: 70vh; }
+    .hero h2 { font-size:32px; padding: 0 20px; }
+    .card { min-width: 200px; }
+    .slider { overflow-x: auto; scrollbar-width: none; }
+    .slider::-webkit-scrollbar { display: none; }
+}
+
+/* PIZZA LOADER */
+#loader {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#0f0f0f;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:2000;
+    display: none;
+}
+
+#loader p {
+    color: var(--primary);
+    margin-top:15px;
+    font-size:18px;
+}
+
+.pizza {
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:orange;
+    position:relative;
+    animation: spin 1s linear infinite;
+}
+
+.pizza::before {
+    content:"";
+    width:10px;
+    height:10px;
+    background:red;
+    position:absolute;
+    top:20px;
+    left:20px;
+    border-radius:50%;
+    box-shadow: 20px 10px red, 10px 30px red;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* CUSTOM NOTIFICATION */
+.notification-bar {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 3000;
+    transition: top 0.5s ease;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-bar.show {
+    top: 0;
+}
+
+.notification-bar .icon {
+    font-size: 20px;
+}
+
+/* RATING SECTION */
+.rating-section {
+    padding: 60px 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.stars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.star {
+    font-size: 40px;
+    cursor: pointer;
+    color: #444;
+    transition: 0.3s;
+}
+
+.star.active {
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary);
+}
+
+.rating-section button {
+    padding: 10px 30px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- PIZZA LOADER -->
+<div id="loader">
+  <div class="pizza"></div>
+  <p>Delicious Bites...</p>
+</div>
+
+<!-- CUSTOM NOTIFICATION BAR -->
+<div id="notificationBar" class="notification-bar">
+    <span class="icon">🔔</span>
+    <span id="notificationMessage"></span>
+</div>
+
+<!-- NAVBAR -->
+<header>
+    <h1> Delicious Bites</h1>
+    <nav>
+    <a href="#" onclick="goToPage('index.html')">Home</a>
+    <a href="#" onclick="goToPage('menu.html')">Menu</a>
+    <a href="#" onclick="goToPage('reservation.html')">Reservation</a>
+    <a href="#" onclick="goToPage('transactions.html')">Transactions</a>
+    <a href="#" onclick="goToPage('contact.html')">Contact </a>
+    <a href="#" onclick="goToPage('about.html')">About </a>
+   
+   
+  
+   
+    <a href="#" onclick="logout()">Logout</a>
+</nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div>
+        <h2>Experience Premium Dining</h2>
+        <p>Fresh • Delicious • Fast </p>
+    </div>
+</section>
+
+<!-- FOOD CAROUSEL -->
+<section class="carousel">
+    <h2>Popular Dishes</h2>
+
+    <div class="slider" id="slider">
+
+        <div class="card">
+            <img src="/Images/Burger.jpg">
+            <h3>Burger</h3>
+            <p>GH₵ 50</p>
+        </div>
+
+        <div class="card">
+            <img src="/Images/Pizza.jpg">
+            <h3>Pizza</h3>
+            <p>GH₵ 80</p>
+        </div>
+
+        <div class="card">
+            <img src="/Images/Salad.jpg">
+            <h3>Salad</h3>
+            <p>GH₵ 40</p>
+        </div>
+
+        <div class="card">
+            <img src="/Images/Fried Rice.jpg">
+            <h3>Fried Rice</h3>
+            <p>GH₵ 60</p>
+        </div>
+
+        <div class="card">
+            <img src="/Images/loaded fries.jpg">
+            <h3>Loaded Fries</h3>
+            <p>GH₵ 30</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- RATING SECTION -->
+<section class="rating-section">
+    <h2>Rate Our Service</h2>
+    <p>How was your experience today?</p>
+    <div class="stars" id="starContainer">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+    </div>
+    <button onclick="submitRating()">Submit Rating</button>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 Delicious Bites</p>
+</footer>
+
+<script>
+// AUTO SLIDE (modern carousel)
+const slider = document.getElementById("slider");
+
+let scrollAmount = 0;
+
+function showNotification(message) {
+    const bar = document.getElementById("notificationBar");
+    const msg = document.getElementById("notificationMessage");
+    msg.innerText = message;
+    bar.classList.add("show");
+    setTimeout(() => {
+        bar.classList.remove("show");
+    }, 3000);
+}
+
+function autoSlide() {
+    scrollAmount += 270;
+
+    if (scrollAmount >= slider.scrollWidth - slider.clientWidth) {
+        scrollAmount = 0;
+    }
+
+    slider.scrollTo({
+        left: scrollAmount,
+        behavior: "smooth"
+    });
+}
+
+setInterval(autoSlide, 2500);
+
+// RATING LOGIC
+let selectedRating = 0;
+const stars = document.querySelectorAll(".star");
+
+stars.forEach(star => {
+    star.addEventListener("click", () => {
+        selectedRating = star.getAttribute("data-value");
+        updateStars();
+    });
+});
+
+function updateStars() {
+    stars.forEach(star => {
+        if (parseInt(star.getAttribute("data-value")) <= selectedRating) {
+            star.classList.add("active");
+        } else {
+            star.classList.remove("active");
+        }
+    });
+}
+
+function submitRating() {
+    if (selectedRating == 0) {
+        showNotification("Please select a star rating first!");
+        return;
+    }
+
+    const username = localStorage.getItem("currentUser") || "Guest";
+    const message = `Hello Delicious Bites! I am ${username} and I just rated your service: ${selectedRating} Stars ★`;
+    const phone = "233558627995"; // Standardized with 233 prefix for Ghana
+
+    showNotification(`Thank you for your ${selectedRating}-star rating! Redirecting to WhatsApp...`);
+    
+    setTimeout(() => {
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+        selectedRating = 0;
+        updateStars();
+    }, 1500);
+}
+
+// LOGOUT
+function logout() {
+    localStorage.removeItem("currentUser"); // Clear current user session
+    showNotification("Logged out!");
+    setTimeout(() => {
+        goToPage("login.html");
+    }, 1000);
+}
+
+function goToPage(url) {
+    document.getElementById("loader").style.display = "flex";
+    setTimeout(() => {
+        window.location.href = url;
+    }, 1500);
+}
+</script>
+
+</body>
+</html>

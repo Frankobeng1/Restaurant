@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu  Delicious Bites</title>
+
+<style>
+:root {
+    --primary:#ff7a18;
+}
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
+
+body {
+    background:#0f0f0f;
+    color:white;
+}
+
+/* NAVBAR */
+header {
+    position:fixed;
+    width:100%;
+    top:0;
+    display:flex;
+    justify-content:space-between;
+    padding:15px 40px;
+    background:rgba(0,0,0,0.6);
+    z-index:1000;
+}
+
+header h1 { color:var(--primary); }
+
+nav a {
+    margin:0 10px;
+    color:#ddd;
+    text-decoration:none;
+    cursor:pointer;
+}
+
+/* CART */
+.cart {
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:orange;
+    padding:10px 15px;
+    border-radius:20px;
+    cursor:pointer;
+    font-weight:bold;
+    z-index:1000;
+}
+
+/* SECTION */
+.menu-section {
+    padding:100px 30px 40px;
+}
+
+.menu-section h2 {
+    color:var(--primary);
+    margin-bottom:20px;
+}
+
+/* GRID */
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+}
+
+/* CARD */
+.card {
+    background:#1a1a1a;
+    border-radius:15px;
+    overflow:hidden;
+    text-align:center;
+    transition:0.3s;
+}
+
+.card:hover { transform:translateY(-8px); }
+
+.card img { width:100%; height:200px; object-fit:cover; }
+
+.card h3 { margin:10px; }
+
+.card p { color:var(--primary); }
+
+button {
+    margin:10px;
+    padding:8px 12px;
+    border:none;
+    border-radius:8px;
+    background:var(--primary);
+    color:white;
+    cursor:pointer;
+}
+
+/* PIZZA LOADER */
+#loader {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#0f0f0f;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:2000;
+    display: none;
+}
+
+#loader p {
+    color: var(--primary);
+    margin-top:15px;
+    font-size:18px;
+}
+
+.pizza {
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:orange;
+    position:relative;
+    animation: spin 1s linear infinite;
+}
+
+.pizza::before {
+    content:"";
+    width:10px;
+    height:10px;
+    background:red;
+    position:absolute;
+    top:20px;
+    left:20px;
+    border-radius:50%;
+    box-shadow: 20px 10px red, 10px 30px red;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* CUSTOM NOTIFICATION */
+.notification-bar {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 3000;
+    transition: top 0.5s ease;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-bar.show {
+    top: 0;
+}
+
+.notification-bar .icon {
+    font-size: 20px;
+}
+
+/* Responsive */
+@media(max-width:768px){
+    header { 
+        padding:10px 20px; 
+        flex-direction: column;
+        align-items: center;
+        position: static;
+    }
+    header h1 { font-size: 24px; margin-bottom: 10px; }
+    nav { display: flex; flex-wrap: wrap; justify-content: center; }
+    nav a { margin: 5px 10px; font-size: 14px; }
+    .menu-section { padding: 40px 15px; }
+    .grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .card img { height: 120px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PIZZA LOADER -->
+<div id="loader">
+  <div class="pizza"></div>
+  <p>Delicious Bites...</p>
+</div>
+
+<!-- CUSTOM NOTIFICATION BAR -->
+<div id="notificationBar" class="notification-bar">
+    <span class="icon">🔔</span>
+    <span id="notificationMessage"></span>
+</div>
+
+<header>
+    <h1>🍽️ Delicious Bites</h1>
+    <nav style="display:flex;align-items:center;">
+        <a onclick="goToPage('index.html')">Home</a>
+        <a onclick="goToPage('cart.html')" style="margin-left:10px;">Cart</a>
+        <a onclick="logout()" style="margin-left:10px;">Logout</a>
+        <div id="navbarCart" onclick="goToPage('cart.html')" style="margin-left:20px; background:orange; padding:8px 14px; border-radius:20px; cursor:pointer; font-weight:bold; color:#fff; display:flex; align-items:center;">
+            🛒 <span style="margin:0 5px;">Cart</span> (<span id="cartCount">0</span>)
+        </div>
+    </nav>
+</header>
+
+<!-- FOODS -->
+<section class="menu-section">
+<h2>🍛 Foods</h2>
+<div class="grid">
+<div class="card"><img src="images/Foods/Jollof Rice.jpg"><h3>Jollof Rice</h3><p>GH₵ 70</p><button onclick="addToCart('Jollof Rice',70)">Add</button></div>
+<div class="card"><img src="images/Foods/Fried Rice.jpg"><h3>Fried Rice</h3><p>GH₵ 60</p><button onclick="addToCart('Fried Rice',60)">Add</button></div>
+<div class="card"><img src="images/Foods/Banku & Tilapia.jpg"><h3>Banku & Tilapia</h3><p>GH₵ 80</p><button onclick="addToCart('Banku & Tilapia',80)">Add</button></div>
+<div class="card"><img src="images/Foods/Waakye.jpg"><h3>Waakye</h3><p>GH₵ 50</p><button onclick="addToCart('Waakye',50)">Add</button></div>
+<div class="card"><img src="images/Foods/Fufu & Soup.jpg"><h3>Fufu & Soup</h3><p>GH₵ 90</p><button onclick="addToCart('Fufu & Soup',90)">Add</button></div>
+<div class="card"><img src="images/Foods/Rice & Chicken.jpg"><h3>Rice & Chicken</h3><p>GH₵ 65</p><button onclick="addToCart('Rice & Chicken',65)">Add</button></div>
+<div class="card"><img src="images/Foods/Grilled Chicken.jpg"><h3>Grilled Chicken</h3><p>GH₵ 75</p><button onclick="addToCart('Grilled Chicken',75)">Add</button></div>
+<div class="card"><img src="images/Foods/Spaghetti.jpg"><h3>Spaghetti</h3><p>GH₵ 55</p><button onclick="addToCart('Spaghetti',55)">Add</button></div>
+<div class="card"><img src="images/Foods/Beef Stew.jpg"><h3>Beef Stew</h3><p>GH₵ 70</p><button onclick="addToCart('Beef Stew',70)">Add</button></div>
+<div class="card"><img src="images/Foods/Yam & Egg.jpg"><h3>Yam & Egg</h3><p>GH₵ 45</p><button onclick="addToCart('Yam & Egg',45)">Add</button></div>
+</div>
+</section>
+
+<!-- DESSERTS -->
+<section class="menu-section">
+<h2>🍰 Desserts</h2>
+<div class="grid">
+<div class="card"><img src="images/Desserts/Ice Cream.jpg"><h3>Ice Cream</h3><p>GH₵ 25</p><button onclick="addToCart('Ice Cream',25)">Add</button></div>
+<div class="card"><img src="images/Desserts/Chocolate Cake.jpg"><h3>Chocolate Cake</h3><p>GH₵ 30</p><button onclick="addToCart('Chocolate Cake',30)">Add</button></div>
+<div class="card"><img src="images/Desserts/Donuts.jpg"><h3>Donuts</h3><p>GH₵ 20</p><button onclick="addToCart('Donuts',20)">Add</button></div>
+<div class="card"><img src="images/Desserts/Cupcake.jpg"><h3>Cupcake</h3><p>GH₵ 15</p><button onclick="addToCart('Cupcake',15)">Add</button></div>
+<div class="card"><img src="images/Desserts/Cheesecake.jpg"><h3>Cheesecake</h3><p>GH₵ 35</p><button onclick="addToCart('Cheesecake',35)">Add</button></div>
+<div class="card"><img src="images/Desserts/Fruit Salad.jpg"><h3>Fruit Salad</h3><p>GH₵ 20</p><button onclick="addToCart('Fruit Salad',20)">Add</button></div>
+<div class="card"><img src="images/Desserts/Pancakes.jpg"><h3>Pancakes</h3><p>GH₵ 30</p><button onclick="addToCart('Pancakes',30)">Add</button></div>
+<div class="card"><img src="images/Desserts/Brownie.jpg"><h3>Brownie</h3><p>GH₵ 25</p><button onclick="addToCart('Brownie',25)">Add</button></div>
+<div class="card"><img src="images/Desserts/Milkshake.jpg"><h3>Milkshake</h3><p>GH₵ 35</p><button onclick="addToCart('Milkshake',35)">Add</button></div>
+<div class="card"><img src="images/Desserts/Waffles.jpg"><h3>Waffles</h3><p>GH₵ 30</p><button onclick="addToCart('Waffles',30)">Add</button></div>
+</div>
+</section>
+
+<!-- DRINKS -->
+<section class="menu-section">
+<h2>🥤 Drinks</h2>
+<div class="grid">
+<div class="card"><img src="images/Drinks/Coke.jpg"><h3>Coke</h3><p>GH₵ 10</p><button onclick="addToCart('Coke',10)">Add</button></div>
+<div class="card"><img src="images/Drinks/Fanta.jpg"><h3>Fanta</h3><p>GH₵ 10</p><button onclick="addToCart('Fanta',10)">Add</button></div>
+<div class="card"><img src="images/Drinks/Sprite.jpg"><h3>Sprite</h3><p>GH₵ 10</p><button onclick="addToCart('Sprite',10)">Add</button></div>
+<div class="card"><img src="images/Drinks/Orange Juice.jpg"><h3>Orange Juice</h3><p>GH₵ 15</p><button onclick="addToCart('Orange Juice',15)">Add</button></div>
+<div class="card"><img src="images/Drinks/Pineapple Juice.jpg"><h3>Pineapple Juice</h3><p>GH₵ 15</p><button onclick="addToCart('Pineapple Juice',15)">Add</button></div>
+<div class="card"><img src="images/Drinks/Water.jpg"><h3>Water</h3><p>GH₵ 5</p><button onclick="addToCart('Water',5)">Add</button></div>
+<div class="card"><img src="images/Drinks/Milkshake.jpg"><h3>Milkshake</h3><p>GH₵ 20</p><button onclick="addToCart('Milkshake',20)">Add</button></div>
+<div class="card"><img src="images/Drinks/Coffee.jpg"><h3>Coffee</h3><p>GH₵ 15</p><button onclick="addToCart('Coffee',15)">Add</button></div>
+<div class="card"><img src="images/Drinks/Tea.jpg"><h3>Tea</h3><p>GH₵ 10</p><button onclick="addToCart('Tea',10)">Add</button></div>
+<div class="card"><img src="images/Drinks/Smoothie.jpg"><h3>Smoothie</h3><p>GH₵ 25</p><button onclick="addToCart('Smoothie',25)">Add</button></div>
+</div>
+</section>
+
+<!-- SNACKS -->
+<section class="menu-section">
+<h2>🍟 Snacks</h2>
+<div class="grid">
+<div class="card"><img src="images/Snacks/Fries.jpg"><h3>Fries</h3><p>GH₵ 20</p><button onclick="addToCart('Fries',20)">Add</button></div>
+<div class="card"><img src="images/Snacks/Chicken Wings.jpg"><h3>Chicken Wings</h3><p>GH₵ 35</p><button onclick="addToCart('Chicken Wings',35)">Add</button></div>
+<div class="card"><img src="images/Snacks/Spring Roll.jpg"><h3>Spring Rolls</h3><p>GH₵ 25</p><button onclick="addToCart('Spring Rolls',25)">Add</button></div>
+<div class="card"><img src="images/Snacks/Samosa.jpg"><h3>Samosa</h3><p>GH₵ 20</p><button onclick="addToCart('Samosa',20)">Add</button></div>
+<div class="card"><img src="images/Snacks/Popcorn.jpg"><h3>Popcorn</h3><p>GH₵ 15</p><button onclick="addToCart('Popcorn',15)">Add</button></div>
+<div class="card"><img src="images/Snacks/Pizza Slice.jpg"><h3>Pizza Slice</h3><p>GH₵ 30</p><button onclick="addToCart('Pizza Slice',30)">Add</button></div>
+<div class="card"><img src="images/Snacks/Burger.jpg"><h3>Burger</h3><p>GH₵ 50</p><button onclick="addToCart('Burger',50)">Add</button></div>
+<div class="card"><img src="images/Snacks/Hot Dog.jpg"><h3>Hot Dog</h3><p>GH₵ 25</p><button onclick="addToCart('Hot Dog',25)">Add</button></div>
+<div class="card"><img src="images/Snacks/Shawarma.jpg"><h3>Shawarma</h3><p>GH₵ 40</p><button onclick="addToCart('Shawarma',40)">Add</button></div>
+<div class="card"><img src="images/Snacks/Meat Pie.jpg"><h3>Meat Pie</h3><p>GH₵ 20</p><button onclick="addToCart('Meat Pie',20)">Add</button></div>
+</div>
+</section>
+
+<script>
+// CART FUNCTIONALITY
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function showNotification(message) {
+    const bar = document.getElementById("notificationBar");
+    const msg = document.getElementById("notificationMessage");
+    msg.innerText = message;
+    bar.classList.add("show");
+    setTimeout(() => {
+        bar.classList.remove("show");
+    }, 3000);
+}
+
+function addToCart(name, price){
+    let existing = cart.find(item => item.name === name);
+    if(existing){ existing.quantity += 1; }
+    else{ cart.push({name, price, quantity:1}); }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartCount();
+    showNotification(name + " added 🛒");
+}
+
+function updateCartCount(){
+    let total = cart.reduce((sum,item)=>sum+item.quantity,0);
+    document.getElementById("cartCount").innerText = total;
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    showNotification("Logged out!");
+    setTimeout(() => {
+        goToPage("login.html");
+    }, 1000);
+}
+
+// PAGE NAVIGATION WITH LOADER
+function goToPage(url){
+    document.getElementById("loader").style.display = "flex";
+    setTimeout(()=>{ window.location.href = url; }, 1500);
+}
+
+updateCartCount();
+</script>
+
+</body>
+</html>
